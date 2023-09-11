@@ -38,49 +38,105 @@ struct ContentView: View {
   @State private var greenColor: Double = 0.0
   @State private var blueColor: Double = 0.0
   @State private var foregroundColor = Color(red: 0, green: 0, blue: 0)
-
+  @Environment(\.verticalSizeClass) var verticalSizeClass
+  @Environment(\.horizontalSizeClass) var horizontalSizeClass
   var body: some View {
-
-    VStack {
-      Text("Color Picker")
-        .font(.largeTitle)
-
-      RoundedRectangle(cornerRadius: 0)
-        .foregroundColor(foregroundColor)
-        .border(.black)
-      VStack {
-        Text("Red")
-        HStack {
-          Slider(value: $redColor, in: 0...255)
-          Text("\(Int(redColor.rounded()))")
+    ZStack{
+      if verticalSizeClass == .regular && horizontalSizeClass == .compact
+      {
+        VStack {
+          TextView(screenTitle: "Color Picker")
+          
+          RoundedRectangleView(foregroundColor: $foregroundColor)
+          
+          SliderView(titleText: "Red", sliderTint: .red, sliderValue: $redColor)
+          
+          SliderView(titleText: "Green", sliderTint: .green, sliderValue: $greenColor)
+          
+          SliderView(titleText: "Blue", sliderTint: .blue, sliderValue: $blueColor)
+          
+          SetColorButton(redColor: $redColor, greenColor: $greenColor, blueColor: $blueColor, foregroundColor: $foregroundColor)
         }
       }
-      VStack {
-        Text("Green")
-        HStack {
-          Slider(value: $greenColor, in: 0...255)
-          Text("\(Int(greenColor.rounded()))")
+      else{
+        HStack{
+          VStack {
+            TextView(screenTitle: "Color Picker")
+            
+            RoundedRectangleView(foregroundColor: $foregroundColor)
+          }
+          VStack{
+            SliderView(titleText: "Red", sliderTint: .red, sliderValue: $redColor)
+            
+            SliderView(titleText: "Green", sliderTint: .green, sliderValue: $greenColor)
+            
+            SliderView(titleText: "Blue", sliderTint: .blue, sliderValue: $blueColor)
+            
+            SetColorButton(redColor: $redColor, greenColor: $greenColor, blueColor: $blueColor, foregroundColor: $foregroundColor)
+          }.padding(10)
         }
-      }
-      VStack {
-        Text("Blue")
-        HStack {
-          Slider(value: $blueColor, in: 0...255)
-          Text("\(Int(blueColor.rounded()))")
-        }
-      }
-      Button("Set Color") {
-        foregroundColor = Color(red: redColor / 255, green: greenColor / 255, blue: blueColor / 255)
       }
     }
-    .background(Color.white)
+    .background(Color("BackgroundColor"))
     .padding(20)
-
   }
 }
-
+struct RoundedRectangleView: View {
+  @Binding var foregroundColor: Color
+  var body: some View {
+    RoundedRectangle(cornerRadius: 0)
+      .foregroundColor(foregroundColor)
+      .border(Color("Border"), width: 7.0)
+  }
+}
+struct SliderView: View {
+  var titleText: String
+  var sliderTint: Color
+  @Binding var sliderValue: Double
+  
+  var body: some View {
+    
+    VStack {
+      Text(titleText)
+      HStack {
+        Slider(value: $sliderValue, in: 0...255)
+          .accentColor(sliderTint)
+        Text("\(Int(sliderValue.rounded()))")
+          .bold()
+      }
+    }
+  }
+}
+struct SetColorButton: View {
+  
+  @Binding var redColor: Double
+  @Binding var greenColor: Double
+  @Binding var blueColor: Double
+  @Binding var foregroundColor: Color
+  var body: some View {
+    Button("Set Color") {
+      foregroundColor = Color(red: redColor / 255, green: greenColor / 255, blue: blueColor / 255)
+    }
+    .frame(width:120, height:50.0, alignment: .center)
+    .background(.blue)
+    .overlay(
+      RoundedRectangle(cornerRadius: Constants.General.rounderRectCornerRadius)
+        .strokeBorder(Color.white, lineWidth: Constants.General.strokeWidth)
+    )
+    .foregroundColor(.white)
+    .bold()
+    .cornerRadius(Constants.General.rounderRectCornerRadius)
+    .font(.title3)
+  }
+}
 struct ContentView_Previews: PreviewProvider {
   static var previews: some View {
     ContentView()
+    ContentView()
+      .previewInterfaceOrientation(.portrait)
+      .preferredColorScheme(.dark)
+    ContentView()
+      .previewInterfaceOrientation(.landscapeLeft)
+      .preferredColorScheme(.dark)
   }
 }
